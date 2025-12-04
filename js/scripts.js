@@ -49,11 +49,11 @@ copiarContainer.classList = "copiar-lista"
 seccionUtilidades.appendChild(copiarContainer)
 
 const labelCopiar = document.createElement("label")
-labelCopiar.innerText = "Copiar items de esta lista"
+labelCopiar.innerText = "Copiar tareas de esta lista"
 copiarContainer.appendChild(labelCopiar)
 
 const buttonCopiar = document.createElement("button")
-buttonCopiar.innerText = "Copiar items"
+buttonCopiar.innerText = "Copiar tareas"
 copiarContainer.appendChild(buttonCopiar)
 
 // --- Bloque: pegar / importar lista ---
@@ -62,17 +62,20 @@ importarContainer.classList = "importar-lista"
 seccionUtilidades.appendChild(importarContainer)
 
 const labelImportar = document.createElement("label")
-labelImportar.innerText = "Pegar una lista que te pasaron:"
+labelImportar.innerText = "Pegar una lista de tareas que te pasaron:"
 importarContainer.appendChild(labelImportar)
 
 const textareaImportar = document.createElement("textarea")
 textareaImportar.rows = 4
-textareaImportar.placeholder = "Un item por línea o separados por comas..."
+textareaImportar.placeholder = "Una tarea por línea o separadas por comas..."
 importarContainer.appendChild(textareaImportar)
 
 const buttonImportar = document.createElement("button")
-buttonImportar.innerText = "Agregar a mi lista"
+buttonImportar.innerText = "Agregar a mis tareas"
 importarContainer.appendChild(buttonImportar)
+
+// ===================== CLAVE DE STORAGE (ESPECÍFICA DE TAREAS) =====================
+const STORAGE_KEY = "listaTareas"
 
 //=============================Funcion para agregar elementos al Storage y al DOM===========================
 
@@ -85,7 +88,7 @@ function agregarElementoAlLocalStorage(texto, completado = false) {
 
     if (newItem.texto === "") return
 
-    let listaItems = JSON.parse(localStorage.getItem("listaItems")) || []
+    let listaItems = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []
 
     // Evitar duplicados (sin importar mayúsculas/minúsculas)
     let valor = listaItems.some(obj => obj.texto.toLowerCase() == newItem.texto.toLowerCase())
@@ -97,13 +100,13 @@ function agregarElementoAlLocalStorage(texto, completado = false) {
             (a.texto.toLowerCase() > b.texto.toLowerCase()) ? 1 :
             (a.texto.toLowerCase() < b.texto.toLowerCase()) ? -1 : 0
         )
-        localStorage.setItem("listaItems", JSON.stringify(listaItems))
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(listaItems))
     }
 }
 
 // Función para cargar la lista de elementos desde el almacenamiento local
 function cargarListaDesdeLocalStorage() {
-    let listaItems = JSON.parse(localStorage.getItem("listaItems")) || []
+    let listaItems = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []
 
     // ✅ Ordenar: primero los completados (true) al inicio
     listaItems.sort((a, b) => {
@@ -114,7 +117,7 @@ function cargarListaDesdeLocalStorage() {
     })
 
     // ✅ IMPORTANTE: guardar el orden ya ordenado
-    localStorage.setItem("listaItems", JSON.stringify(listaItems))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(listaItems))
 
     // limpio primero
     seccionItems.innerHTML = ""
@@ -130,7 +133,7 @@ function cargarListaDesdeLocalStorage() {
         tick.addEventListener("change", function () {
             // actualizo ese item en el array
             item.completado = tick.checked
-            localStorage.setItem("listaItems", JSON.stringify(listaItems))
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(listaItems))
             cargarListaDesdeLocalStorage() // 🔄 refrescar y reordenar
         })
 
@@ -178,23 +181,23 @@ button1.addEventListener("click", function () {
 
 //Función eliminar un solo item
 function eliminarElemento(index) {
-    let listaItems = JSON.parse(localStorage.getItem("listaItems")) || []
+    let listaItems = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []
 
     // como el storage ya está ORDENADO igual que el DOM,
     // ahora este index sí coincide ✅
     listaItems.splice(index, 1)
 
-    localStorage.setItem("listaItems", JSON.stringify(listaItems))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(listaItems))
 
     cargarListaDesdeLocalStorage()
 }
 
 // ===================== COPIAR LISTA =====================
 buttonCopiar.addEventListener("click", function () {
-    const listaItems = JSON.parse(localStorage.getItem("listaItems")) || []
+    const listaItems = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []
 
     if (listaItems.length === 0) {
-        alert("No hay items para copiar.")
+        alert("No hay tareas para copiar.")
         return
     }
 
@@ -244,5 +247,4 @@ buttonImportar.addEventListener("click", function () {
 // Cargo la lista al cargar la página
 window.addEventListener("load", cargarListaDesdeLocalStorage)
 
-
-cargarListaDesdeLocalStorage
+cargarListaDesdeLocalStorage()
